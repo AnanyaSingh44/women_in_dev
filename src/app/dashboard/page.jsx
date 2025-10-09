@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import DashboardClient from './DashboardClient';
 import { MongoClient } from 'mongodb';
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://ananyawork1221_db_user:123@cluster0.ptngld1.mongodb.net/";
+const MONGODB_URI = process.env.MONGODB_URI ;
 
 const DashboardPage = async () => {
   // DO NOT use await or destructure with headers()
