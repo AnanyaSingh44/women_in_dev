@@ -28,7 +28,7 @@ export default function SOSButton({ isNavbar, isMobileMenu }) {
         
         // --- CRITICAL FIX: Correct locationLink formatting ---
         // Changed the incorrect backtick string to a valid template literal Google Maps query
-        const locationLink = `http://googleusercontent.com/maps.google.com/maps?q=${latitude},${longitude}`;
+const locationLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
 
         try {
           const res = await fetch("/api/emergency/sos", {

@@ -238,7 +238,16 @@ Welcome back, <span className="font-semibold">{session?.user?.name}</span>
               />
             ))}
           </div>
-
+<div>
+  <a
+  href="https://d3f1dc50678fc91166.gradio.live/"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="inline-block px-8 py-4 bg-pink-600 hover:bg-pink-700 text-white font-bold rounded-2xl text-xl shadow transition-colors duration-300"
+>
+  Try AI Assistant
+</a>
+</div>
         
         </div>
       </div>

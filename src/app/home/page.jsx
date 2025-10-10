@@ -33,7 +33,7 @@ const DETECTION_RADIUS_METERS = 50;
 
 // --- HOME PAGE COMPONENT ---
 const HomePage = () => {
-  const images = ["head2.jpeg", "head3.jpg", "head4.webp"];
+  const images = ["head2.jpeg", "head3.jpg", "head4.webp","logo.svg"];
   const [isNearRiskZone, setIsNearRiskZone] = useState(false);
   const [zoneName, setZoneName] = useState("");
   const [alertClosed, setAlertClosed] = useState(false);
@@ -120,7 +120,7 @@ const HomePage = () => {
   
   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-center">
     <h1 className="text-9xl font-bold bg-gradient-to-r from-pink-600 via-rose-500 to-purple-600 bg-clip-text text-transparent mb-2 tracking-tight">
-      Streesakhi
+      StreeSakhi
     </h1>
     <div className="h-0.5 w-20 bg-gradient-to-r from-pink-400 via-rose-400 to-purple-400 mx-auto mt-3 rounded-full"></div>
     <p className="text-gray-600 text-sm mt-3 font-light tracking-wide">Your Safe Space</p>
@@ -157,7 +157,7 @@ const HomePage = () => {
       <KnowYourRights />
 
       {/* Voiceflow Chat */}
-      <div className="fixed bottom-5 right-5 z-50">
+      <div className="fixed bottom-5 right-5 z-10">
         <VoiceflowChat />
       </div>
    
