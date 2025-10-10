@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import IdentityComplaintForm from '@/components/IdentityComplaintForm';
+import ComplaintChat from "@/components/ComplaintChat";
 
 export default function DashboardClient({ user }) {
   const [activeTab, setActiveTab] = useState('overview');
@@ -15,7 +16,7 @@ export default function DashboardClient({ user }) {
     const fetchComplaints = async () => {
       setLoading(true);
       try {
-        const res = await fetch('/api/complaints/user'); // dedicated route
+        const res = await fetch('/api/complaints'); // dedicated route
         if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
         const data = await res.json();
         setComplaints(data.success ? data.complaints || [] : []);
@@ -92,7 +93,8 @@ export default function DashboardClient({ user }) {
                 {['PENDING', 'IN_PROGRESS', 'RESOLVED', 'REJECTED'].map((status) => (
                   <div key={status} className="bg-white border border-gray-200 rounded-lg p-4">
                     <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">
-                      {status.replace('_', ' ')}
+                 {status?.replace('_', ' ') || 'Unknown'}
+
                     </p>
                     <p className="text-2xl font-semibold text-gray-900">
                       {complaints.filter((c) => c.status === status).length}
@@ -137,7 +139,7 @@ export default function DashboardClient({ user }) {
                                     complaint.status
                                   )}`}
                                 >
-                                  {complaint.status.replace('_', ' ')}
+                                  {complaint.status.replace('_', ' ')|| 'Unknown'}
                                 </span>
                                 <span className="text-xs text-gray-500">{complaint.complaintId}</span>
                               </div>
@@ -207,7 +209,7 @@ export default function DashboardClient({ user }) {
                               complaint.status
                             )}`}
                           >
-                            {complaint.status.replace('_', ' ')}
+                                  {complaint.status.replace('_', ' ')|| 'Unknown'}
                           </span>
                           {complaint.needImmediateHelp && (
                             <span className="px-2 py-1 rounded text-xs font-medium bg-red-50 text-red-700 border border-red-200">
@@ -260,7 +262,7 @@ export default function DashboardClient({ user }) {
                               setExpandedComplaintId(isExpanded ? null : (complaint._id || complaint.complaintId))
                             }
                           >
-                            {isExpanded ? "Hide Details" : "View Details"}
+                            {isExpanded ? "Hide Details" : "View Details & Chat"}
                           </button>
                         </div>
                         {isExpanded && (
@@ -293,9 +295,17 @@ export default function DashboardClient({ user }) {
                                 <span className="font-medium">Emotional State:</span> {complaint.emotionalState}
                               </p>
                             )}
-                            {/* Add more fields if needed */}
+                            {/* Add more fields if needed */}  <div className="mb-6">
+                                  <h2 className="text-lg font-semibold text-pink-600 mb-3">Investigation Chats</h2>
+                                  <ComplaintChat
+                                    complaintId={complaint.complaintId}
+                                    userRole="public"
+                                    userName="Anonymous"
+                                  />
+                                </div>
                           </div>
                         )}
+                       
                       </div>
                     );
                   })

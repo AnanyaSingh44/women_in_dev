@@ -3,6 +3,7 @@ import { authClient } from '@/lib/auth-client';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
+import SOSButton from './SOSButton';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -53,15 +54,11 @@ const Navbar = () => {
                 className="absolute inset-0 rounded-2xl blur-md opacity-50 group-hover:opacity-75 transition-opacity duration-300"
                 style={{ backgroundColor: 'rgba(255, 255, 255, 0.3)' }}
               ></div>
-              <div 
-                className="relative w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300"
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
-              >
-                <span className="text-white font-bold text-2xl">A</span>
-              </div>
+            
             </div>
-            <span className="text-2xl font-bold text-white transition-all duration-300">
-              MyApp
+         
+            <span className="text-4xl font-bold text-white transition-all duration-300">
+             StreeSakhi
             </span>
           </Link>
 
@@ -76,6 +73,9 @@ const Navbar = () => {
                 className="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"
               ></span>
             </Link> */}
+            <div className="transform transition-transform duration-300 hover:scale-105">
+              <SOSButton isNavbar={true} /> 
+            </div>
             
             {!mounted || isPending ? (
               <div className="flex items-center space-x-4">
@@ -137,6 +137,10 @@ const Navbar = () => {
 
           {/* Mobile menu button */}
           <div className="md:hidden">
+            <div className="transform transition-transform duration-300 hover:scale-105">
+              {/* Note: SOSButton will need to be made smaller for the navbar to fit well */}
+              <SOSButton isNavbar={true} /> 
+            </div>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="relative w-10 h-10 text-white focus:outline-none rounded-lg transition-all duration-300 flex items-center justify-center hover:bg-white/10"

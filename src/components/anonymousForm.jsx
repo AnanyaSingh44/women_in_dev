@@ -2,9 +2,56 @@
 
 import { useState } from 'react';
 
+// New component for the Toast notification
+const ComplaintToast = ({ id, onClose }) => {
+  const handleCopy = () => {
+    navigator.clipboard.writeText(id).then(() => {
+      alert('Complaint ID copied to clipboard!');
+    }, (err) => {
+      console.error('Could not copy text: ', err);
+      alert('Failed to copy ID. Please copy it manually: ' + id);
+    });
+  };
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50 p-4 bg-gray-800 text-white rounded-lg shadow-xl max-w-sm">
+      <div className="flex justify-between items-start">
+        <div className="flex-1">
+          <p className="font-semibold text-sm mb-1">Complaint Submitted Successfully!</p>
+          <p className="text-xs">
+            Your anonymous Complaint ID is:
+          </p>
+          <div className="flex items-center mt-2 bg-gray-700 p-2 rounded">
+            <span className="font-mono text-sm mr-2 select-all break-all">{id}</span>
+            <button
+              onClick={handleCopy}
+              className="ml-auto flex-shrink-0 text-xs px-2 py-1 bg-gray-600 rounded hover:bg-gray-500 transition-colors"
+            >
+              Copy ID
+            </button>
+          </div>
+          <p className="text-xs mt-2 text-yellow-300">
+            **Please copy this ID to track your complaint.**
+          </p>
+        </div>
+        <button onClick={onClose} className="ml-4 text-gray-400 hover:text-white">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+
 export default function AnonymousComplaintFormToggle() {
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // State for the Toast notification
+  const [toastId, setToastId] = useState(null); 
+
   const [formData, setFormData] = useState({
     incidentType: '',
     incidentDescription: '',
@@ -29,6 +76,24 @@ export default function AnonymousComplaintFormToggle() {
     });
   };
 
+  const resetForm = () => {
+    setFormData({
+      incidentType: '',
+      incidentDescription: '',
+      incidentDate: '',
+      incidentTime: '',
+      incidentLocation: '',
+      accusedName: '',
+      accusedPosition: '',
+      organization: '',
+      witnesses: '',
+      previousIncidents: '',
+      emotionalState: '',
+      needImmediateHelp: false,
+      attachments: '',
+    });
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -46,31 +111,29 @@ export default function AnonymousComplaintFormToggle() {
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
-      if (data.success) {
-        alert(`Complaint submitted! Your ID: ${data.complaintId}`);
-        setFormData({
-          incidentType: '',
-          incidentDescription: '',
-          incidentDate: '',
-          incidentTime: '',
-          incidentLocation: '',
-          accusedName: '',
-          accusedPosition: '',
-          organization: '',
-          witnesses: '',
-          previousIncidents: '',
-          emotionalState: '',
-          needImmediateHelp: false,
-          attachments: '',
-        });
+      // Check for success status code (200-299)
+      if (res.ok) {
+        // Assuming your API returns { success: true, complaintId: "..." }
+        const data = await res.json(); 
+
+        // 1. Show Toast Notification with the ID
+        setToastId(data.complaintId || complaintId);
+        
+        // Hide the toast after 15 seconds (optional)
+        setTimeout(() => setToastId(null), 15000); 
+
+        // 2. Reset Form and hide
+        resetForm();
         setShowForm(false);
+        
       } else {
-        alert('Error submitting complaint');
+        // Handle non-200 status codes (e.g., 400 Bad Request, 500 Server Error)
+        const errorData = await res.json().catch(() => ({ message: 'Unknown error' }));
+        alert(`Error submitting complaint: ${errorData.message || res.statusText}`);
       }
     } catch (err) {
       console.error(err);
-      alert('Server error');
+      alert('Server error. Check console for details.');
     } finally {
       setIsSubmitting(false);
     }
@@ -82,8 +145,6 @@ export default function AnonymousComplaintFormToggle() {
         {/* Header */}
         {!showForm && (
           <div className="text-center mb-8">
-         
-           
             <button
               onClick={() => setShowForm(true)}
               className="bg-gray-900 text-white text-sm font-medium px-6 py-3 rounded hover:bg-gray-800 transition-colors"
@@ -93,9 +154,10 @@ export default function AnonymousComplaintFormToggle() {
           </div>
         )}
 
-        {/* Form Card */}
+        {/* Form Card (rest of the form remains the same) */}
         {showForm && (
           <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+            {/* ... Form Header and Close button ... */}
             <div className="px-6 py-5 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
@@ -280,7 +342,7 @@ export default function AnonymousComplaintFormToggle() {
               {/* Emotional State */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Current Emotional State
+                  Current Emotional State<span>*</span>
                 </label>
                 <select
                   name="emotionalState"
@@ -367,6 +429,11 @@ export default function AnonymousComplaintFormToggle() {
           </div>
         )}
       </div>
+
+      {/* RENDER THE TOAST */}
+      {toastId && (
+        <ComplaintToast id={toastId} onClose={() => setToastId(null)} />
+      )}
     </div>
   );
 }

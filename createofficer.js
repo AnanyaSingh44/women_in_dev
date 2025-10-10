@@ -1,32 +1,70 @@
 import dotenv from "dotenv";
-dotenv.config();
-
 import { MongoClient, ObjectId } from "mongodb";
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://ananyawork1221_db_user:123@cluster0.ptngld1.mongodb.net/";
-if (!MONGODB_URI) throw new Error("MONGODB_URI is required.");
+// Load environment variables from .env file
+dotenv.config();
 
-const client = new MongoClient(MONGODB_URI);
-await client.connect();
-const db = client.db();
+const MONGODB_URI = process.env.MONGODB_URI;
+if (!MONGODB_URI) {
+    // Use throw new Error instead of console.log + exit for better error handling
+    throw new Error("MONGODB_URI environment variable is required.");
+}
 
-async function addRoleToUser(userId, role) {
-    const users = db.collection("user");
-    const _id = new ObjectId(userId);
+async function addRoleToUser(userIdString, role) {
+    const client =  new MongoClient(MONGODB_URI);
 
-    const result = await users.updateOne(
-        { _id },
-        { $set: { role } }
-    );
+    try {
+        await client.connect();
+        const db = client.db(); // uses the default DB from the connection string
+        const users = db.collection("user"); // **Ensure this collection name is correct**
 
-    if (result.matchedCount === 0) {
-        console.log("No user found with _id:", userId);
-    } else {
-        console.log(`Added role "${role}" to user with _id: ${userId}`);
+        let userId;
+        try {
+            // Convert the string ID to a MongoDB ObjectId
+            userId = new ObjectId(userIdString);
+        } catch (e) {
+            console.error(`Invalid ObjectId format for userId: ${userIdString}`);
+            return;
+        }
+        
+        const query = { _id: userId };
+
+        console.log(`Attempting to set role "${role}" for user ID: ${userIdString}`);
+        
+        const result = await users.updateOne(query, {
+            $set: {
+                role: role.toUpperCase(), // Best practice: use consistent case
+                updatedAt: new Date()
+            }
+        });
+
+        if (result.matchedCount === 0) {
+            console.log("❌ Update failed: No user found with _id:", userIdString);
+        } else if (result.modifiedCount === 0) {
+            console.log("⚠️ Update succeeded: User found, but role was already set to that value.");
+        } 
+        else {
+            console.log(`✅ Success! Updated ${result.modifiedCount} user.`);
+            console.log(`Role changed to "${role.toUpperCase()}" for user with _id: ${userIdString}`);
+        }
+
+    } catch (err) {
+        console.error("🚨 MongoDB Operation Failed:", err);
+    } finally {
+        // Ensure the client connection is closed
+        await client.close();
     }
 }
 
-// Usage:
-await addRoleToUser("68e7635d949f5bf657b746fe", "OFFICER");
+// --- Execution ---
+const userIdToUpdate = "68e885b2e3cad42b17058310"; 
+const newRole = "LAWYER";
 
-process.exit(0);
+(async () => {
+    await addRoleToUser(userIdToUpdate, newRole);
+    // Explicitly exit the process to ensure termination after the script finishes
+    process.exit(0);
+})();
+
+// To run this file, save it (e.g., as updateRole.js) and execute in your terminal:
+// node updateRole.js

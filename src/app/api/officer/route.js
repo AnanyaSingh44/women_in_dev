@@ -39,14 +39,34 @@ export async function GET(req) {
 }
 
 export async function PATCH(req) {
-  // Update complaint status
-  const { complaintId, status } = await req.json();
-  await client.connect();
-  const db = client.db();
-  const complaints = db.collection("complaints");
-  const result = await complaints.updateOne(
-    { complaintId },
-    { $set: { status } }
-  );
-  return Response.json({ success: result.modifiedCount === 1 });
+  try {
+    const { complaintId, status, priority } = await req.json();
+
+    if (!complaintId) {
+      return Response.json({ success: false, message: "Missing complaintId" }, { status: 400 });
+    }
+
+    await client.connect();
+    const db = client.db();
+    const complaints = db.collection("complaints");
+
+    const updateFields = {};
+    if (status) updateFields.status = status;
+    if (priority) updateFields.priority = priority;
+
+    const result = await complaints.updateOne(
+      { complaintId },
+      { $set: updateFields }
+    );
+
+    return Response.json({
+      success: result.modifiedCount === 1,
+      updated: updateFields,
+    });
+  } catch (error) {
+    console.error("PATCH error:", error);
+    return Response.json({ success: false, message: "Server error" }, { status: 500 });
+  } finally {
+    await client.close();
+  }
 }

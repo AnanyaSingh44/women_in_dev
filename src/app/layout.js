@@ -3,6 +3,8 @@ import "./globals.css";
 import Link from "next/link";
 import LogoutButton  from "@/components/logout";
 import Navbar from "@/components/Navbar";
+import { Toaster } from "react-hot-toast";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,6 +46,8 @@ export default function RootLayout({ children }) {
 <Navbar/>
 
         {children}
+                <Toaster position="top-center" reverseOrder={false} />
+
       </body>
     </html>
 
