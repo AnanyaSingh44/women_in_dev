@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
 let isConnected = false;
-console.log("hiiiiiiii");
-console.log("MONGODB_URI:", process.env.MONGODB_URI);
+
+// console.log("MONGODB_URI:", process.env.MONGODB_URI);
 
 export const connectDB = async () => {
   if (isConnected) return;

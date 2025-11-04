@@ -240,7 +240,7 @@ Welcome back, <span className="font-semibold">{session?.user?.name}</span>
           </div>
 <div>
   <a
-  href="https://d3f1dc50678fc91166.gradio.live/"
+  href="https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/5c2148592f06a3e0c91002f3b7637045/8bc6d310-e4a7-4666-9c26-2a5f4e2cba2a/index.html"
   target="_blank"
   rel="noopener noreferrer"
   className="inline-block px-8 py-4 bg-pink-600 hover:bg-pink-700 text-white font-bold rounded-2xl text-xl shadow transition-colors duration-300"

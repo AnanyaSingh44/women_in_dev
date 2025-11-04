@@ -167,7 +167,7 @@ export default function KnowYourRights() {
 
             {/* Rights section with styled border */}
             <div className="border-2 border-pink-200 rounded-xl p-4 bg-gradient-to-br from-pink-50/50 to-purple-50/50">
-              <h3 className="text-xl font-semibold text-gray-700 mb-4 flex items-center border-b-2 border-dashed border-pink-300 pb-2">
+              <h3 className="text-xl font-semibold text-gray-700 mb-4 flex items-center border-b-4 border-dashed border-pink-500 pb-2">
                 <span className="w-1.5 h-6 bg-gradient-to-b from-[#EA2264] to-pink-400 rounded-full mr-2"></span>
                 Your Rights
               </h3>
