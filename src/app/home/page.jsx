@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useState, useEffect } from 'react';
 import { motion } from "framer-motion";
 import { ImagesSlider } from '@/components/ui/images-slider';
@@ -26,10 +27,14 @@ const getDistance = (lat1, lon1, lat2, lon2) => {
 const HIGH_RISK_ZONES = [
   { lat: 19.0760, lon: 72.8777, name: "Mumbai Central Area" }, 
   { lat: 12.9716, lon: 77.5946, name: "Bangalore City Center" },
-  { lat: 20.949694, lon: 79.026389, name: "Current Test Zone (Borkhedi, MH)" } 
+  { 
+    lat: 20.949439, // Use the received Lat from the log
+    lon: 79.029668, // Use the received Lon from the log
+    name: "Current Test Zone (Borkhedi, MH)" 
+  }
 ];
 
-const DETECTION_RADIUS_METERS = 50;
+const DETECTION_RADIUS_METERS = 1000;
 
 // --- HOME PAGE COMPONENT ---
 const HomePage = () => {
@@ -39,37 +44,93 @@ const HomePage = () => {
   const [alertClosed, setAlertClosed] = useState(false);
 
   // Geolocation monitoring
-  useEffect(() => {
-    if (!navigator.geolocation) return console.warn('Geolocation not supported.');
+  // useEffect(() => {
+  //   if (!navigator.geolocation) return console.warn('Geolocation not supported.');
+  //   console.log('Starting geolocation watch...');
 
-    const checkRiskZone = ({ coords }) => {
-      const { latitude, longitude } = coords;
-      let nearZone = false;
-      let zoneLabel = "";
+  //   const checkRiskZone = ({ coords }) => {
+  //     const { latitude, longitude } = coords;
+  //     let nearZone = false;
+  //     let zoneLabel = "";
 
-      for (const zone of HIGH_RISK_ZONES) {
-        if (getDistance(latitude, longitude, zone.lat, zone.lon) < DETECTION_RADIUS_METERS) {
-          nearZone = true;
-          zoneLabel = zone.name;
-          break;
-        }
+  //     for (const zone of HIGH_RISK_ZONES) {
+  //       if (getDistance(latitude, longitude, zone.lat, zone.lon) < DETECTION_RADIUS_METERS) {
+  //         nearZone = true;
+  //         zoneLabel = zone.name;
+  //         break;
+  //       }
+  //     }
+
+  //     if (isNearRiskZone !== nearZone) {
+  //       setIsNearRiskZone(nearZone);
+  //       setZoneName(zoneLabel);
+  //       if (nearZone) setAlertClosed(false);
+  //     }
+  //   };
+
+  //   const watcher = navigator.geolocation.watchPosition(
+  //     checkRiskZone,
+  //     (err) => console.error('Geolocation error:', err.message),
+  //     { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+  //   );
+
+  //   return () => navigator.geolocation.clearWatch(watcher);
+  // }, [isNearRiskZone]);
+// Geolocation monitoring
+useEffect(() => {
+  if (!navigator.geolocation) {
+    console.error('DEBUG: Geolocation API is NOT supported by this browser.');
+    return console.warn('Geolocation not supported.');
+  }
+
+  console.log('DEBUG: Starting geolocation watch...');
+  // Initialize state check to track changes
+  let isNearCurrently = false;
+
+  const checkRiskZone = ({ coords }) => {
+    const { latitude, longitude, accuracy } = coords;
+    console.log(`DEBUG: Position received. Lat: ${latitude.toFixed(6)}, Lon: ${longitude.toFixed(6)}, Accuracy: ${accuracy.toFixed(1)}m`);
+
+    let nearZone = false;
+    let zoneLabel = "";
+
+    for (const zone of HIGH_RISK_ZONES) {
+      const distance = getDistance(latitude, longitude, zone.lat, zone.lon);
+      console.log(`DEBUG: Distance to ${zone.name} (${zone.lat.toFixed(6)}, ${zone.lon.toFixed(6)}): ${distance.toFixed(2)} meters.`);
+
+      if (distance < DETECTION_RADIUS_METERS) {
+        nearZone = true;
+        zoneLabel = zone.name;
+        break;
       }
+    }
 
-      if (isNearRiskZone !== nearZone) {
-        setIsNearRiskZone(nearZone);
-        setZoneName(zoneLabel);
-        if (nearZone) setAlertClosed(false);
-      }
-    };
+    if (isNearCurrently !== nearZone) {
+      // Log the state change only when it actually changes
+      console.log(`DEBUG: ALERT STATE CHANGE DETECTED! Near Risk Zone: ${nearZone}. Zone Name: ${zoneLabel}`);
+      setIsNearRiskZone(nearZone);
+      setZoneName(zoneLabel);
+      if (nearZone) setAlertClosed(false);
+      isNearCurrently = nearZone; // Update the local tracker
+    } else {
+      console.log(`DEBUG: Alert state remains ${isNearCurrently ? 'TRUE' : 'FALSE'}.`);
+    }
+  };
 
-    const watcher = navigator.geolocation.watchPosition(
-      checkRiskZone,
-      (err) => console.error('Geolocation error:', err.message),
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
-    );
+  const watcher = navigator.geolocation.watchPosition(
+    checkRiskZone,
+    (err) => {
+      console.error('DEBUG: Geolocation error detailed:', err.code, err.message);
+      console.error('Geolocation error:', err.message);
+    },
+    { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+  );
 
-    return () => navigator.geolocation.clearWatch(watcher);
-  }, [isNearRiskZone]);
+  return () => {
+    console.log('DEBUG: Clearing geolocation watch.');
+    navigator.geolocation.clearWatch(watcher);
+  };
+}, []); // Empty dependency array ensures it runs once on mount
 
   const navigationItems = [
     { title: "Report", icon: "M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z", href: "/anonymousForm", gradient: "from-purple-500 to-pink-500" },
