@@ -23,3 +23,6 @@ export async function GET(req) {
     return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
 }
+
+export const dynamic ='force-dynamic';
+export const revalidate=0;
